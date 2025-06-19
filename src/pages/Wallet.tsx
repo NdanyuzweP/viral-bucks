@@ -3,7 +3,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { 
   Wallet as WalletIcon, 
   ArrowUpRight, 
-  ArrowDownLeft,
   CreditCard,
   Smartphone,
   TrendingUp,

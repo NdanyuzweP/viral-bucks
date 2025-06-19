@@ -6,14 +6,14 @@ import {
   Calendar, 
   Award, 
   TrendingUp,
-  Settings,
+  Share2,
   Shield,
-  Bell,
   Eye,
   EyeOff,
   Edit3,
   Save,
-  X
+  X,
+  Copy
 } from 'lucide-react';
 
 const Profile: React.FC = () => {
@@ -27,15 +27,17 @@ const Profile: React.FC = () => {
     newPassword: '',
     confirmPassword: '',
   });
+  const [copied, setCopied] = useState(false);
 
-  const achievements = [
-    { title: 'First Task', description: 'Complete your first task', earned: true, date: '2024-01-15' },
-    { title: 'Early Bird', description: 'Complete 10 tasks', earned: true, date: '2024-01-18' },
-    { title: 'Task Master', description: 'Complete 50 tasks', earned: false, progress: 23 },
-    { title: 'P2P Trader', description: 'Complete your first P2P trade', earned: true, date: '2024-01-20' },
-    { title: 'Task Master', description: 'Earn $500 in total', earned: false, progress: 450 },
-    { title: 'Referral King', description: 'Refer 10 friends', earned: false, progress: 3 },
-  ];
+  // Generate a referral link (you might want to get this from your backend)
+  const referralCode = user?.referralCode || 'VLAR' + Math.random().toString(36).substr(2, 8).toUpperCase();
+  const referralLink = `https://vilarbucks.com/signup?ref=${referralCode}`;
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(referralLink);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleSave = () => {
     // Here you would typically save to backend
@@ -58,7 +60,7 @@ const Profile: React.FC = () => {
       {/* Header */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Profile</h1>
-        <p className="text-gray-600 mt-1">Manage your account settings and view your achievements</p>
+        <p className="text-gray-600 mt-1">Manage your account settings</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -105,7 +107,8 @@ const Profile: React.FC = () => {
                 </div>
                 <span className="text-sm font-medium text-gray-900">${user?.totalEarned.toFixed(2)}</span>
               </div>
-            </div>
+
+              
 
             <button
               onClick={() => setIsEditing(true)}
@@ -116,225 +119,56 @@ const Profile: React.FC = () => {
             </button>
           </div>
         </div>
-
-        {/* Main Content */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Account Settings */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-bold text-gray-900">Account Settings</h3>
-              {isEditing && (
-                <div className="flex space-x-2">
+        {/* Referral Section */}
+              <div className="p-3 bg-gradient-to-r from-primary-50  to-secondary-50 rounded-lg border border-primary-100">
+                <div className="flex items-center space-x-2 mb-2">
+                  <Share2 className="h-4 w-4 text-primary-600" />
+                  <span className="text-sm font-medium text-primary-700">Your Referral Code</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="flex-1 bg-white rounded-l-lg p-2 border border-r-0 border-gray-300">
+                    <span className="font-mono text-sm">{referralCode}</span>
+                  </div>
                   <button
-                    onClick={handleSave}
-                    className="flex items-center space-x-1 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
+                    onClick={copyToClipboard}
+                    className="bg-primary-500 hover:bg-primary-600 text-white px-3 py-2 rounded-r-lg border border-primary-500 transition-colors text-sm flex items-center"
                   >
-                    <Save size={16} />
-                    <span>Save</span>
-                  </button>
-                  <button
-                    onClick={handleCancel}
-                    className="flex items-center space-x-1 px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm"
-                  >
-                    <X size={16} />
-                    <span>Cancel</span>
+                    <Copy size={16} className="mr-1" />
+                    {copied ? 'Copied!' : 'Copy'}
                   </button>
                 </div>
-              )}
-            </div>
-
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Full Name
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                {/* <div className="mt-3">
+                  <p className="text-xs text-gray-600 mb-1">Share your referral link:</p>
+                  <div className="flex">
                     <input
                       type="text"
-                      value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                      disabled={!isEditing}
-                      className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                      readOnly
+                      value={referralLink}
+                      className="flex-1 text-xs p-2 border border-gray-300 rounded-l-lg focus:outline-none"
                     />
+                    <button
+                      onClick={copyToClipboard}
+                      className="bg-secondary-500 hover:bg-secondary-600 text-white px-3 py-2 rounded-r-lg border border-secondary-500 transition-colors text-xs"
+                    >
+                      Copy Link
+                    </button>
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-                    <input
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                      disabled={!isEditing}
-                      className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-                    />
+                </div> */}
+                {user?.referralCount > 0 && (
+                  <div className="mt-2 text-center text-xs text-green-600">
+                    You've referred {user.referralCount} friends! Earned ${(user.referralCount * 5).toFixed(2)}
                   </div>
-                </div>
-              </div>
-
-              {isEditing && (
-                <div className="border-t pt-6">
-                  <h4 className="font-medium text-gray-900 mb-4">Change Password</h4>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Current Password
-                      </label>
-                      <input
-                        type="password"
-                        value={formData.currentPassword}
-                        onChange={(e) => setFormData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        placeholder="Enter current password"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          New Password
-                        </label>
-                        <div className="relative">
-                          <input
-                            type={showPassword ? 'text' : 'password'}
-                            value={formData.newPassword}
-                            onChange={(e) => setFormData(prev => ({ ...prev, newPassword: e.target.value }))}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent pr-10"
-                            placeholder="Enter new password"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                          >
-                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                          </button>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Confirm New Password
-                        </label>
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          value={formData.confirmPassword}
-                          onChange={(e) => setFormData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                          placeholder="Confirm new password"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Achievements */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-6">Achievements</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {achievements.map((achievement, index) => (
-                <div
-                  key={index}
-                  className={`p-4 rounded-xl border-2 transition-all duration-200 ${
-                    achievement.earned
-                      ? 'border-green-200 bg-green-50'
-                      : 'border-gray-200 bg-gray-50'
-                  }`}
-                >
-                  <div className="flex items-start space-x-3">
-                    <div className={`p-2 rounded-lg ${
-                      achievement.earned ? 'bg-green-500' : 'bg-gray-300'
-                    }`}>
-                      <Award className="h-5 w-5 text-white" />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className={`font-bold ${
-                        achievement.earned ? 'text-green-900' : 'text-gray-700'
-                      }`}>
-                        {achievement.title}
-                      </h4>
-                      <p className={`text-sm ${
-                        achievement.earned ? 'text-green-700' : 'text-gray-600'
-                      }`}>
-                        {achievement.description}
-                      </p>
-                      {achievement.earned ? (
-                        <p className="text-xs text-green-600 mt-1">
-                          Earned on {achievement.date}
-                        </p>
-                      ) : (
-                        achievement.progress && (
-                          <div className="mt-2">
-                            <div className="flex justify-between text-xs text-gray-600 mb-1">
-                              <span>Progress</span>
-                              <span>{achievement.progress}/{achievement.title === 'Task Master' && achievement.description === 'Complete 50 tasks' ? '50' : '500'}</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-2">
-                              <div
-                                className="bg-gradient-to-r from-primary-500 to-secondary-500 h-2 rounded-full"
-                                style={{ width: `${achievement.title === 'Task Master' && achievement.description === 'Complete 50 tasks' ? (achievement.progress / 50) * 100 : (achievement.progress / 500) * 100}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Preferences */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 mb-6">Preferences</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <Bell className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <p className="font-medium text-gray-900">Email Notifications</p>
-                    <p className="text-sm text-gray-600">Receive notifications about new tasks and earnings</p>
-                  </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" defaultChecked className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                </label>
-              </div>
-
-              <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <Settings className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <p className="font-medium text-gray-900">Auto-complete Tasks</p>
-                    <p className="text-sm text-gray-600">Automatically mark simple tasks as complete</p>
-                  </div>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input type="checkbox" className="sr-only peer" />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
-                </label>
+                )}
               </div>
             </div>
-          </div>
+
+        {/* Rest of your existing code remains the same */}
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
 
           {/* Danger Zone */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-red-200">
-            <h3 className="text-lg font-bold text-red-900 mb-4">Danger Zone</h3>
             <div className="space-y-4">
-              <button className="w-full sm:w-auto px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-medium">
-                Deactivate Account
-              </button>
               <button
                 onClick={logout}
                 className="w-full sm:w-auto ml-0 sm:ml-3 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"

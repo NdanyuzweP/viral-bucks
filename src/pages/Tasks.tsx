@@ -125,114 +125,116 @@ const VIPSystem: React.FC = () => {
   const VIPModal = ({ vip }: { vip: any }) => {
     const IconComponent = vip.icon;
     const monthlyEarning = vip.dailyEarning * 30;
-    const yearlyEarning = vip.dailyEarning * 365;
     const roiDays = vip.cost > 0 ? Math.ceil(vip.cost / vip.dailyEarning) : 0;
 
     return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end justify-center p-4 z-50">
-        <div className="bg-white rounded-t-3xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-          <div className="p-6">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div className="bg-white rounded-2xl w-full max-w-sm max-h-[70vh] overflow-y-auto">
+          <div className="p-4">
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className={`p-3 rounded-2xl bg-gradient-to-r ${vip.bgColor}`}>
-                <IconComponent className={`h-8 w-8 bg-gradient-to-r ${vip.color} bg-clip-text text-transparent`} />
+            <div className="flex items-center justify-between mb-4">
+              <div className={`p-2 rounded-xl bg-gradient-to-r ${vip.bgColor}`}>
+                <IconComponent className={`h-6 w-6 bg-gradient-to-r ${vip.color} bg-clip-text text-transparent`} />
               </div>
               <button
                 onClick={() => setSelectedVIP(null)}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
               >
                 ✕
               </button>
             </div>
 
             {/* VIP Info */}
-            <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">{vip.name}</h3>
+            <div className="text-center mb-4">
+              <h3 className="text-xl font-bold text-gray-900 mb-1">{vip.name}</h3>
               {vip.status === 'closed' && (
-                <div className="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-medium mb-4">
-                  <Lock className="h-4 w-4 mr-1" />
-                  Currently Closed
+                <div className="inline-flex items-center px-2 py-1 rounded-full bg-red-100 text-red-700 text-xs font-medium">
+                  <Lock className="h-3 w-3 mr-1" />
+                  Closed
                 </div>
               )}
             </div>
 
             {/* Earnings Info */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <div className={`p-4 rounded-2xl bg-gradient-to-r ${vip.bgColor}`}>
-                <div className="flex items-center space-x-2 mb-1">
-                  <DollarSign className="h-5 w-5 text-green-600" />
-                  <span className="font-bold text-gray-900">${vip.dailyEarning.toFixed(2)}</span>
+            <div className="grid grid-cols-2 gap-2 mb-4">
+              <div className={`p-3 rounded-xl bg-gradient-to-r ${vip.bgColor}`}>
+                <div className="flex items-center space-x-1 mb-1">
+                  <DollarSign className="h-4 w-4 text-green-600" />
+                  <span className="font-bold text-gray-900 text-sm">${vip.dailyEarning.toFixed(2)}</span>
                 </div>
-                <p className="text-xs text-gray-600">Per Day</p>
+                <p className="text-xs text-gray-600">Daily</p>
               </div>
-              <div className={`p-4 rounded-2xl bg-gradient-to-r ${vip.bgColor}`}>
-                <div className="flex items-center space-x-2 mb-1">
-                  <Calendar className="h-5 w-5 text-blue-600" />
-                  <span className="font-bold text-gray-900">${monthlyEarning.toFixed(2)}</span>
+              <div className={`p-3 rounded-xl bg-gradient-to-r ${vip.bgColor}`}>
+                <div className="flex items-center space-x-1 mb-1">
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <span className="font-bold text-gray-900 text-sm">${monthlyEarning.toFixed(2)}</span>
                 </div>
-                <p className="text-xs text-gray-600">Per Month</p>
+                <p className="text-xs text-gray-600">Monthly</p>
               </div>
             </div>
 
             {/* Investment Info */}
             {vip.cost > 0 && (
-              <div className="bg-gray-50 rounded-2xl p-4 mb-6">
-                <div className="grid grid-cols-2 gap-4">
+              <div className="bg-gray-50 rounded-xl p-3 mb-4">
+                <div className="grid grid-cols-2 gap-3 text-center">
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">Investment</p>
-                    <p className="font-bold text-gray-900">${vip.cost}</p>
+                    <p className="text-xs text-gray-600 mb-1">Investment</p>
+                    <p className="font-bold text-gray-900 text-sm">${vip.cost}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 mb-1">ROI Time</p>
-                    <p className="font-bold text-gray-900">{roiDays} days</p>
+                    <p className="text-xs text-gray-600 mb-1">ROI Time</p>
+                    <p className="font-bold text-gray-900 text-sm">{roiDays} days</p>
                   </div>
                 </div>
               </div>
             )}
 
             {/* Features */}
-            <div className="mb-6">
-              <h4 className="font-bold text-gray-900 mb-3">VIP Benefits:</h4>
-              <div className="space-y-2">
-                {vip.features.map((feature: string, index: number) => (
-                  <div key={index} className="flex items-start space-x-3">
-                    <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 bg-gradient-to-r ${vip.color}`}>
-                      <CheckCircle className="h-3 w-3 text-white" />
+            <div className="mb-4">
+              <h4 className="font-bold text-gray-900 mb-2 text-sm">Benefits:</h4>
+              <div className="space-y-1">
+                {vip.features.slice(0, 3).map((feature: string, index: number) => (
+                  <div key={index} className="flex items-start space-x-2">
+                    <div className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center mt-0.5 bg-gradient-to-r ${vip.color}`}>
+                      <CheckCircle className="h-2.5 w-2.5 text-white" />
                     </div>
-                    <p className="text-gray-700 text-sm">{feature}</p>
+                    <p className="text-gray-700 text-xs">{feature}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               {vip.status === 'closed' ? (
-                <div className="w-full py-4 px-4 bg-gray-100 text-gray-500 rounded-2xl text-center font-medium">
-                  <Lock className="h-5 w-5 inline mr-2" />
+                <div className="w-full py-3 px-4 bg-gray-100 text-gray-500 rounded-xl text-center font-medium text-sm">
+                  <Lock className="h-4 w-4 inline mr-2" />
                   Not Available
                 </div>
+              ) : vip.level === 0 && userVIP === 0 ? (
+                <div className="w-full py-3 px-4 bg-green-100 text-green-700 rounded-xl text-center font-medium text-sm">
+                  <CheckCircle className="h-4 w-4 inline mr-2" />
+                  Receive Tasks
+                </div>
               ) : vip.level <= userVIP ? (
-                <div className="w-full py-4 px-4 bg-green-100 text-green-700 rounded-2xl text-center font-medium">
-                  <CheckCircle className="h-5 w-5 inline mr-2" />
+                <div className="w-full py-3 px-4 bg-green-100 text-green-700 rounded-xl text-center font-medium text-sm">
+                  <CheckCircle className="h-4 w-4 inline mr-2" />
                   Current Level
                 </div>
               ) : (
-                <>
-                  <button
-                    onClick={() => handleUpgrade(vip.level, vip.cost)}
-                    className={`w-full py-4 px-4 bg-gradient-to-r ${vip.color} text-white rounded-2xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg`}
-                  >
-                    {vip.cost === 0 ? 'Current Level' : `Upgrade for $${vip.cost}`}
-                  </button>
-                  <button
-                    onClick={() => setSelectedVIP(null)}
-                    className="w-full py-3 px-4 border border-gray-300 rounded-2xl hover:bg-gray-50 transition-colors font-medium"
-                  >
-                    Maybe Later
-                  </button>
-                </>
+                <button
+                  onClick={() => handleUpgrade(vip.level, vip.cost)}
+                  className={`w-full py-3 px-4 bg-gradient-to-r ${vip.color} text-white rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm`}
+                >
+                  Upgrade for ${vip.cost}
+                </button>
               )}
+              <button
+                onClick={() => setSelectedVIP(null)}
+                className="w-full py-2 px-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-medium text-sm"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
@@ -320,7 +322,9 @@ const VIPSystem: React.FC = () => {
               <button
                 onClick={() => setSelectedVIP(vip.id)}
                 className={`w-full py-3 px-4 rounded-2xl font-medium transition-all duration-200 ${
-                  isCurrentLevel
+                  isCurrentLevel && vip.level === 0
+                    ? 'bg-green-100 text-green-700'
+                    : isCurrentLevel
                     ? 'bg-green-100 text-green-700'
                     : vip.status === 'closed'
                     ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
@@ -328,7 +332,7 @@ const VIPSystem: React.FC = () => {
                 }`}
                 disabled={vip.status === 'closed'}
               >
-                {isCurrentLevel ? 'Current Level' : vip.status === 'closed' ? 'Not Available' : 'View Details'}
+                {isCurrentLevel && vip.level === 0 ? 'Receive Tasks' : isCurrentLevel ? 'Current Level' : vip.status === 'closed' ? 'Not Available' : 'View Details'}
               </button>
             </div>
           );
