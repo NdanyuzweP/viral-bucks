@@ -1,242 +1,362 @@
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { mockTasks } from '../data/mockData';
 import { 
-  CheckCircle, 
-  Clock, 
+  Crown, 
   DollarSign, 
-  Filter,
+  Lock,
   Star,
-  Play,
-  ExternalLink,
-  Award
+  CheckCircle,
+  Calendar,
+  TrendingUp,
+  Gift,
+  Users,
+  Shield
 } from 'lucide-react';
 
-const Tasks: React.FC = () => {
-  const { updateBalance } = useAuth();
-  const [tasks, setTasks] = useState(mockTasks);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedTask, setSelectedTask] = useState<string | null>(null);
+const VIPSystem: React.FC = () => {
+  const [selectedVIP, setSelectedVIP] = useState<string | null>(null);
+  const [userVIP, setUserVIP] = useState<number>(0); // Current user VIP level
 
-  const categories = [
-    { value: 'all', label: 'All Tasks', icon: Star },
-    { value: 'social', label: 'Social Media', icon: Star },
-    { value: 'survey', label: 'Surveys', icon: CheckCircle },
-    { value: 'app', label: 'App Downloads', icon: ExternalLink },
-    { value: 'video', label: 'Watch Videos', icon: Play },
-    { value: 'referral', label: 'Referrals', icon: Award },
+  const vipLevels = [
+    {
+      id: 'vip0',
+      level: 0,
+      name: 'VIP 0',
+      cost: 0,
+      dailyEarning: 0.5,
+      status: 'active',
+      color: 'from-gray-400 to-gray-600',
+      bgColor: 'from-gray-50 to-gray-100',
+      icon: Users,
+      features: ['Basic earning', 'Community access', 'Daily check-in bonus']
+    },
+    {
+      id: 'vip1',
+      level: 1,
+      name: 'VIP 1',
+      cost: 35,
+      dailyEarning: 1,
+      status: 'active',
+      color: 'from-blue-400 to-blue-600',
+      bgColor: 'from-blue-50 to-blue-100',
+      icon: Star,
+      features: ['2x earning rate', 'Priority support', 'Exclusive tasks', 'Weekly bonus']
+    },
+    {
+      id: 'vip2',
+      level: 2,
+      name: 'VIP 2',
+      cost: 70,
+      dailyEarning: 2.5,
+      status: 'active',
+      color: 'from-purple-400 to-purple-600',
+      bgColor: 'from-purple-50 to-purple-100',
+      icon: Crown,
+      features: ['5x earning rate', 'VIP chat room', 'Monthly rewards', 'Early task access']
+    },
+    {
+      id: 'vip3',
+      level: 3,
+      name: 'VIP 3',
+      cost: 120,
+      dailyEarning: 5,
+      status: 'active',
+      color: 'from-green-400 to-green-600',
+      bgColor: 'from-green-50 to-green-100',
+      icon: TrendingUp,
+      features: ['10x earning rate', 'Personal manager', 'Premium bonuses', 'Referral rewards']
+    },
+    {
+      id: 'vip4',
+      level: 4,
+      name: 'VIP 4',
+      cost: 250,
+      dailyEarning: 10,
+      status: 'active',
+      color: 'from-orange-400 to-orange-600',
+      bgColor: 'from-orange-50 to-orange-100',
+      icon: Gift,
+      features: ['20x earning rate', 'VIP events', 'Custom rewards', 'Advanced analytics']
+    },
+    {
+      id: 'vip5',
+      level: 5,
+      name: 'VIP 5',
+      cost: 500,
+      dailyEarning: 22,
+      status: 'closed',
+      color: 'from-red-400 to-red-600',
+      bgColor: 'from-red-50 to-red-100',
+      icon: Shield,
+      features: ['44x earning rate', 'Elite access', 'Exclusive rewards', 'VIP concierge']
+    },
+    {
+      id: 'vip6',
+      level: 6,
+      name: 'VIP 6',
+      cost: 800,
+      dailyEarning: 38,
+      status: 'closed',
+      color: 'from-pink-400 to-pink-600',
+      bgColor: 'from-pink-50 to-pink-100',
+      icon: Crown,
+      features: ['76x earning rate', 'Diamond benefits', 'Luxury rewards', 'Private advisor']
+    },
+    {
+      id: 'vip7',
+      level: 7,
+      name: 'VIP 7',
+      cost: 1200,
+      dailyEarning: 70,
+      status: 'closed',
+      color: 'from-indigo-400 to-indigo-600',
+      bgColor: 'from-indigo-50 to-indigo-100',
+      icon: Crown,
+      features: ['140x earning rate', 'Platinum access', 'Ultimate rewards', 'Dedicated team']
+    }
   ];
 
-  const difficultyColors = {
-    easy: 'from-green-400 to-green-600',
-    medium: 'from-yellow-400 to-orange-500',
-    hard: 'from-red-400 to-red-600',
+  const handleUpgrade = (vipLevel: number, cost: number) => {
+    // Simulate upgrade logic
+    setUserVIP(vipLevel);
+    setSelectedVIP(null);
+    // In real app, handle payment and upgrade logic here
   };
 
-  const categoryColors = {
-    social: 'from-pink-400 to-purple-600',
-    survey: 'from-blue-400 to-blue-600',
-    app: 'from-green-400 to-teal-600',
-    video: 'from-red-400 to-pink-600',
-    referral: 'from-purple-400 to-indigo-600',
-  };
+  const VIPModal = ({ vip }: { vip: any }) => {
+    const IconComponent = vip.icon;
+    const monthlyEarning = vip.dailyEarning * 30;
+    const yearlyEarning = vip.dailyEarning * 365;
+    const roiDays = vip.cost > 0 ? Math.ceil(vip.cost / vip.dailyEarning) : 0;
 
-  const filteredTasks = selectedCategory === 'all' 
-    ? tasks 
-    : tasks.filter(task => task.category === selectedCategory);
-
-  const handleCompleteTask = (taskId: string) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (task) {
-      setTasks(prev => prev.map(t => 
-        t.id === taskId 
-          ? { ...t, isCompleted: true, completedAt: new Date() }
-          : t
-      ));
-      updateBalance(task.reward);
-      setSelectedTask(null);
-    }
-  };
-
-  const TaskModal = ({ task }: { task: any }) => (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className={`px-3 py-1 rounded-full text-white text-sm font-medium bg-gradient-to-r ${categoryColors[task.category as keyof typeof categoryColors]}`}>
-              {task.category.charAt(0).toUpperCase() + task.category.slice(1)}
-            </div>
-            <button
-              onClick={() => setSelectedTask(null)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              ✕
-            </button>
-          </div>
-
-          <h3 className="text-xl font-bold text-gray-900 mb-2">{task.title}</h3>
-          <p className="text-gray-600 mb-6">{task.description}</p>
-
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-gradient-to-r from-primary-50 to-primary-100 p-4 rounded-xl">
-              <div className="flex items-center space-x-2">
-                <DollarSign className="h-5 w-5 text-primary-600" />
-                <span className="font-bold text-primary-900">${task.reward.toFixed(2)}</span>
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end justify-center p-4 z-50">
+        <div className="bg-white rounded-t-3xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+          <div className="p-6">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className={`p-3 rounded-2xl bg-gradient-to-r ${vip.bgColor}`}>
+                <IconComponent className={`h-8 w-8 bg-gradient-to-r ${vip.color} bg-clip-text text-transparent`} />
               </div>
-              <p className="text-sm text-primary-700">Reward</p>
+              <button
+                onClick={() => setSelectedVIP(null)}
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
+              >
+                ✕
+              </button>
             </div>
-            <div className="bg-gradient-to-r from-secondary-50 to-secondary-100 p-4 rounded-xl">
-              <div className="flex items-center space-x-2">
-                <Clock className="h-5 w-5 text-secondary-600" />
-                <span className="font-bold text-secondary-900">{task.timeToComplete}min</span>
-              </div>
-              <p className="text-sm text-secondary-700">Duration</p>
-            </div>
-          </div>
 
-          <div className="mb-6">
-            <h4 className="font-bold text-gray-900 mb-3">Steps to Complete:</h4>
-            <div className="space-y-2">
-              {task.steps.map((step: string, index: number) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                    {index + 1}
-                  </div>
-                  <p className="text-gray-700">{step}</p>
+            {/* VIP Info */}
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">{vip.name}</h3>
+              {vip.status === 'closed' && (
+                <div className="inline-flex items-center px-3 py-1 rounded-full bg-red-100 text-red-700 text-sm font-medium mb-4">
+                  <Lock className="h-4 w-4 mr-1" />
+                  Currently Closed
                 </div>
-              ))}
+              )}
             </div>
-          </div>
 
-          <div className="flex space-x-3">
-            <button
-              onClick={() => setSelectedTask(null)}
-              className="flex-1 py-3 px-4 border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => handleCompleteTask(task.id)}
-              className="flex-1 py-3 px-4 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-xl hover:from-primary-600 hover:to-secondary-600 transition-all duration-200 transform hover:scale-105 font-medium"
-            >
-              Complete Task
-            </button>
+            {/* Earnings Info */}
+            <div className="grid grid-cols-2 gap-3 mb-6">
+              <div className={`p-4 rounded-2xl bg-gradient-to-r ${vip.bgColor}`}>
+                <div className="flex items-center space-x-2 mb-1">
+                  <DollarSign className="h-5 w-5 text-green-600" />
+                  <span className="font-bold text-gray-900">${vip.dailyEarning.toFixed(2)}</span>
+                </div>
+                <p className="text-xs text-gray-600">Per Day</p>
+              </div>
+              <div className={`p-4 rounded-2xl bg-gradient-to-r ${vip.bgColor}`}>
+                <div className="flex items-center space-x-2 mb-1">
+                  <Calendar className="h-5 w-5 text-blue-600" />
+                  <span className="font-bold text-gray-900">${monthlyEarning.toFixed(2)}</span>
+                </div>
+                <p className="text-xs text-gray-600">Per Month</p>
+              </div>
+            </div>
+
+            {/* Investment Info */}
+            {vip.cost > 0 && (
+              <div className="bg-gray-50 rounded-2xl p-4 mb-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">Investment</p>
+                    <p className="font-bold text-gray-900">${vip.cost}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">ROI Time</p>
+                    <p className="font-bold text-gray-900">{roiDays} days</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Features */}
+            <div className="mb-6">
+              <h4 className="font-bold text-gray-900 mb-3">VIP Benefits:</h4>
+              <div className="space-y-2">
+                {vip.features.map((feature: string, index: number) => (
+                  <div key={index} className="flex items-start space-x-3">
+                    <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 bg-gradient-to-r ${vip.color}`}>
+                      <CheckCircle className="h-3 w-3 text-white" />
+                    </div>
+                    <p className="text-gray-700 text-sm">{feature}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-3">
+              {vip.status === 'closed' ? (
+                <div className="w-full py-4 px-4 bg-gray-100 text-gray-500 rounded-2xl text-center font-medium">
+                  <Lock className="h-5 w-5 inline mr-2" />
+                  Not Available
+                </div>
+              ) : vip.level <= userVIP ? (
+                <div className="w-full py-4 px-4 bg-green-100 text-green-700 rounded-2xl text-center font-medium">
+                  <CheckCircle className="h-5 w-5 inline mr-2" />
+                  Current Level
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={() => handleUpgrade(vip.level, vip.cost)}
+                    className={`w-full py-4 px-4 bg-gradient-to-r ${vip.color} text-white rounded-2xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg`}
+                  >
+                    {vip.cost === 0 ? 'Current Level' : `Upgrade for $${vip.cost}`}
+                  </button>
+                  <button
+                    onClick={() => setSelectedVIP(null)}
+                    className="w-full py-3 px-4 border border-gray-300 rounded-2xl hover:bg-gray-50 transition-colors font-medium"
+                  >
+                    Maybe Later
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gray-50 p-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Available Tasks</h1>
-          <p className="text-gray-600 mt-1">Complete tasks and earn money instantly</p>
-        </div>
-        <div className="mt-4 sm:mt-0">
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <Clock className="h-4 w-4" />
-            <span>All times in minutes</span>
-          </div>
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">VIP Membership</h1>
+        <p className="text-gray-600">Choose your earning level and start making money daily</p>
+        <div className="mt-4 inline-flex items-center px-4 py-2 bg-gradient-to-r from-primary-50 to-secondary-50 rounded-full">
+          <Crown className="h-5 w-5 text-primary-600 mr-2" />
+          <span className="text-sm font-medium text-primary-700">
+            Current: VIP {userVIP}
+          </span>
         </div>
       </div>
 
-      {/* Category Filter */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <div className="flex items-center space-x-3 mb-4">
-          <Filter className="h-5 w-5 text-gray-400" />
-          <h2 className="font-bold text-gray-900">Filter by Category</h2>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => {
-            const IconComponent = category.icon;
-            return (
+      {/* VIP Cards */}
+      <div className="space-y-4 max-w-md mx-auto">
+        {vipLevels.map((vip) => {
+          const IconComponent = vip.icon;
+          const isCurrentLevel = vip.level === userVIP;
+          const monthlyEarning = vip.dailyEarning * 30;
+
+          return (
+            <div
+              key={vip.id}
+              className={`bg-white rounded-3xl p-6 shadow-sm border transition-all duration-200 ${
+                isCurrentLevel 
+                  ? 'border-primary-200 shadow-md ring-2 ring-primary-100' 
+                  : vip.status === 'closed'
+                  ? 'border-gray-200 opacity-60'
+                  : 'border-gray-100 hover:shadow-md hover:scale-[1.02]'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-3 rounded-2xl bg-gradient-to-r ${vip.bgColor}`}>
+                    <IconComponent className={`h-6 w-6 bg-gradient-to-r ${vip.color} bg-clip-text text-transparent`} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">{vip.name}</h3>
+                    {vip.cost > 0 && (
+                      <p className="text-sm text-gray-600">${vip.cost} investment</p>
+                    )}
+                  </div>
+                </div>
+                
+                {vip.status === 'closed' && (
+                  <div className="px-2 py-1 bg-red-100 text-red-600 rounded-lg text-xs font-medium">
+                    <Lock className="h-3 w-3 inline mr-1" />
+                    Closed
+                  </div>
+                )}
+                
+                {isCurrentLevel && (
+                  <div className="px-2 py-1 bg-green-100 text-green-600 rounded-lg text-xs font-medium">
+                    <CheckCircle className="h-3 w-3 inline mr-1" />
+                    Active
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className={`p-3 rounded-xl bg-gradient-to-r ${vip.bgColor}`}>
+                  <div className="flex items-center space-x-2 mb-1">
+                    <DollarSign className="h-4 w-4 text-green-600" />
+                    <span className="font-bold text-gray-900">${vip.dailyEarning.toFixed(2)}</span>
+                  </div>
+                  <p className="text-xs text-gray-600">Daily</p>
+                </div>
+                <div className={`p-3 rounded-xl bg-gradient-to-r ${vip.bgColor}`}>
+                  <div className="flex items-center space-x-2 mb-1">
+                    <Calendar className="h-4 w-4 text-blue-600" />
+                    <span className="font-bold text-gray-900">${monthlyEarning.toFixed(2)}</span>
+                  </div>
+                  <p className="text-xs text-gray-600">Monthly</p>
+                </div>
+              </div>
+
               <button
-                key={category.value}
-                onClick={() => setSelectedCategory(category.value)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
-                  selectedCategory === category.value
-                    ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                onClick={() => setSelectedVIP(vip.id)}
+                className={`w-full py-3 px-4 rounded-2xl font-medium transition-all duration-200 ${
+                  isCurrentLevel
+                    ? 'bg-green-100 text-green-700'
+                    : vip.status === 'closed'
+                    ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                    : `bg-gradient-to-r ${vip.color} text-white hover:shadow-lg transform hover:scale-105`
                 }`}
+                disabled={vip.status === 'closed'}
               >
-                <IconComponent size={16} />
-                <span className="font-medium">{category.label}</span>
+                {isCurrentLevel ? 'Current Level' : vip.status === 'closed' ? 'Not Available' : 'View Details'}
               </button>
-            );
-          })}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Bottom Info */}
+      <div className="mt-8 max-w-md mx-auto">
+        <div className="bg-gradient-to-r from-primary-50 to-secondary-50 rounded-2xl p-6">
+          <div className="text-center">
+            <Star className="h-8 w-8 text-primary-600 mx-auto mb-3" />
+            <h3 className="font-bold text-gray-900 mb-2">Start Earning Today</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              All VIP levels earn money automatically every day. Higher levels = higher daily earnings!
+            </p>
+            <div className="text-xs text-gray-500">
+              * Earnings are credited automatically to your account daily
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Tasks Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTasks.map((task) => (
-          <div
-            key={task.id}
-            className={`bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 transform hover:scale-105 ${
-              task.isCompleted ? 'opacity-60' : ''
-            }`}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className={`px-3 py-1 rounded-full text-white text-sm font-medium bg-gradient-to-r ${categoryColors[task.category as keyof typeof categoryColors]}`}>
-                {task.category.charAt(0).toUpperCase() + task.category.slice(1)}
-              </div>
-              <div className={`px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r ${difficultyColors[task.difficulty]} text-white`}>
-                {task.difficulty.toUpperCase()}
-              </div>
-            </div>
-
-            <h3 className="text-lg font-bold text-gray-900 mb-2">{task.title}</h3>
-            <p className="text-gray-600 text-sm mb-4 line-clamp-2">{task.description}</p>
-
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-1">
-                  <DollarSign className="h-4 w-4 text-green-600" />
-                  <span className="font-bold text-green-600">${task.reward.toFixed(2)}</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Clock className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">{task.timeToComplete}min</span>
-                </div>
-              </div>
-            </div>
-
-            {task.isCompleted ? (
-              <div className="flex items-center justify-center py-3 px-4 bg-green-100 text-green-700 rounded-xl">
-                <CheckCircle className="h-5 w-5 mr-2" />
-                <span className="font-medium">Completed</span>
-              </div>
-            ) : (
-              <button
-                onClick={() => setSelectedTask(task.id)}
-                className="w-full py-3 px-4 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-xl hover:from-primary-600 hover:to-secondary-600 transition-all duration-200 transform hover:scale-105 font-medium"
-              >
-                Start Task
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {filteredTasks.length === 0 && (
-        <div className="text-center py-12">
-          <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle className="h-12 w-12 text-gray-400" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No tasks found</h3>
-          <p className="text-gray-600">Try selecting a different category or check back later for new tasks.</p>
-        </div>
-      )}
-
-      {/* Task Modal */}
-      {selectedTask && (
-        <TaskModal task={tasks.find(t => t.id === selectedTask)} />
+      {/* VIP Modal */}
+      {selectedVIP && (
+        <VIPModal vip={vipLevels.find(v => v.id === selectedVIP)} />
       )}
     </div>
   );
 };
 
-export default Tasks;
+export default VIPSystem;
