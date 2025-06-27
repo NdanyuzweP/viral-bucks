@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { taskService, subscriptionService } from '../services';
+import { useApi, useAsyncAction } from '../hooks/useApi';
 import { 
   Crown, 
   DollarSign, 
@@ -9,118 +12,108 @@ import {
   TrendingUp,
   Gift,
   Users,
-  Shield
+  Shield,
+  Loader2
 } from 'lucide-react';
 
 const VIPSystem: React.FC = () => {
   const [selectedVIP, setSelectedVIP] = useState<string | null>(null);
-  const [userVIP, setUserVIP] = useState<number>(0); // Current user VIP level
+  const [userVIP, setUserVIP] = useState<number>(0);
+  const { user, updateBalance } = useAuth();
 
-  const vipLevels = [
-    {
-      id: 'vip0',
-      level: 0,
-      name: 'VIP 0',
-      cost: 0,
-      dailyEarning: 0.5,
-      status: 'active',
-      color: 'from-gray-400 to-gray-600',
-      bgColor: 'from-gray-50 to-gray-100',
-      icon: Users,
-      features: ['Basic earning', 'Community access', 'Daily check-in bonus']
-    },
-    {
-      id: 'vip1',
-      level: 1,
-      name: 'VIP 1',
-      cost: 35,
-      dailyEarning: 1,
-      status: 'active',
-      color: 'from-blue-400 to-blue-600',
-      bgColor: 'from-blue-50 to-blue-100',
-      icon: Star,
-      features: ['2x earning rate', 'Priority support', 'Exclusive tasks', 'Weekly bonus']
-    },
-    {
-      id: 'vip2',
-      level: 2,
-      name: 'VIP 2',
-      cost: 70,
-      dailyEarning: 2.5,
-      status: 'active',
-      color: 'from-purple-400 to-purple-600',
-      bgColor: 'from-purple-50 to-purple-100',
-      icon: Crown,
-      features: ['5x earning rate', 'VIP chat room', 'Monthly rewards', 'Early task access']
-    },
-    {
-      id: 'vip3',
-      level: 3,
-      name: 'VIP 3',
-      cost: 120,
-      dailyEarning: 5,
-      status: 'active',
-      color: 'from-green-400 to-green-600',
-      bgColor: 'from-green-50 to-green-100',
-      icon: TrendingUp,
-      features: ['10x earning rate', 'Personal manager', 'Premium bonuses', 'Referral rewards']
-    },
-    {
-      id: 'vip4',
-      level: 4,
-      name: 'VIP 4',
-      cost: 250,
-      dailyEarning: 10,
-      status: 'active',
-      color: 'from-orange-400 to-orange-600',
-      bgColor: 'from-orange-50 to-orange-100',
-      icon: Gift,
-      features: ['20x earning rate', 'VIP events', 'Custom rewards', 'Advanced analytics']
-    },
-    {
-      id: 'vip5',
-      level: 5,
-      name: 'VIP 5',
-      cost: 500,
-      dailyEarning: 22,
-      status: 'closed',
-      color: 'from-red-400 to-red-600',
-      bgColor: 'from-red-50 to-red-100',
-      icon: Shield,
-      features: ['44x earning rate', 'Elite access', 'Exclusive rewards', 'VIP concierge']
-    },
-    {
-      id: 'vip6',
-      level: 6,
-      name: 'VIP 6',
-      cost: 800,
-      dailyEarning: 38,
-      status: 'closed',
-      color: 'from-pink-400 to-pink-600',
-      bgColor: 'from-pink-50 to-pink-100',
-      icon: Crown,
-      features: ['76x earning rate', 'Diamond benefits', 'Luxury rewards', 'Private advisor']
-    },
-    {
-      id: 'vip7',
-      level: 7,
-      name: 'VIP 7',
-      cost: 1200,
-      dailyEarning: 70,
-      status: 'closed',
-      color: 'from-indigo-400 to-indigo-600',
-      bgColor: 'from-indigo-50 to-indigo-100',
-      icon: Crown,
-      features: ['140x earning rate', 'Platinum access', 'Ultimate rewards', 'Dedicated team']
+  // Fetch subscriptions from backend
+  const { data: subscriptionsData, loading: subscriptionsLoading } = useApi(
+    () => subscriptionService.getAllSubscriptions(),
+    { immediate: true }
+  );
+
+  // Fetch user's current subscription
+  const { data: userSubscriptionData, refetch: refetchUserSubscription } = useApi(
+    () => subscriptionService.getMySubscription(),
+    { immediate: true }
+  );
+
+  // Subscribe action
+  const { execute: subscribe, loading: subscribing, error: subscribeError } = useAsyncAction(
+    (subscriptionId: number) => subscriptionService.subscribe(subscriptionId)
+  );
+
+  useEffect(() => {
+    if (userSubscriptionData?.subscription) {
+      setUserVIP(userSubscriptionData.subscription.level || 0);
     }
-  ];
+  }, [userSubscriptionData]);
 
-  const handleUpgrade = (vipLevel: number, cost: number) => {
-    // Simulate upgrade logic
-    setUserVIP(vipLevel);
-    setSelectedVIP(null);
-    // In real app, handle payment and upgrade logic here
+  const handleUpgrade = async (subscriptionId: number, cost: number) => {
+    if (!user || user.balance < cost) {
+      alert('Insufficient balance');
+      return;
+    }
+
+    const result = await subscribe(subscriptionId);
+    if (result) {
+      // Update user's balance
+      updateBalance(-cost);
+      // Refetch user subscription
+      await refetchUserSubscription();
+      setSelectedVIP(null);
+      alert('Subscription upgraded successfully!');
+    } else if (subscribeError) {
+      alert(`Subscription failed: ${subscribeError}`);
+    }
   };
+
+  // Transform backend subscriptions to frontend format
+  const vipLevels = subscriptionsData?.subscriptions?.map(sub => ({
+    id: sub.id.toString(),
+    level: sub.level,
+    name: sub.name,
+    cost: sub.price,
+    dailyEarning: sub.price * 0.02, // 2% daily return as example
+    status: sub.isActive ? 'active' : 'closed',
+    color: getColorForLevel(sub.level),
+    bgColor: getBgColorForLevel(sub.level),
+    icon: getIconForLevel(sub.level),
+    features: sub.features || [
+      `${sub.level}x earning rate`,
+      'Priority support',
+      'Exclusive features',
+      'Advanced analytics'
+    ]
+  })) || [];
+
+  function getColorForLevel(level: number) {
+    const colors = [
+      'from-gray-400 to-gray-600',
+      'from-blue-400 to-blue-600',
+      'from-purple-400 to-purple-600',
+      'from-green-400 to-green-600',
+      'from-orange-400 to-orange-600',
+      'from-red-400 to-red-600',
+      'from-pink-400 to-pink-600',
+      'from-indigo-400 to-indigo-600'
+    ];
+    return colors[level] || colors[0];
+  }
+
+  function getBgColorForLevel(level: number) {
+    const colors = [
+      'from-gray-50 to-gray-100',
+      'from-blue-50 to-blue-100',
+      'from-purple-50 to-purple-100',
+      'from-green-50 to-green-100',
+      'from-orange-50 to-orange-100',
+      'from-red-50 to-red-100',
+      'from-pink-50 to-pink-100',
+      'from-indigo-50 to-indigo-100'
+    ];
+    return colors[level] || colors[0];
+  }
+
+  function getIconForLevel(level: number) {
+    const icons = [Users, Star, Crown, TrendingUp, Gift, Shield, Crown, Crown];
+    return icons[level] || Users;
+  }
 
   const VIPModal = ({ vip }: { vip: any }) => {
     const IconComponent = vip.icon;
@@ -214,7 +207,7 @@ const VIPSystem: React.FC = () => {
               ) : vip.level === 0 && userVIP === 0 ? (
                 <div className="w-full py-3 px-4 bg-green-100 text-green-700 rounded-xl text-center font-medium text-sm">
                   <CheckCircle className="h-4 w-4 inline mr-2" />
-                  Receive Tasks
+                  Current Level
                 </div>
               ) : vip.level <= userVIP ? (
                 <div className="w-full py-3 px-4 bg-green-100 text-green-700 rounded-xl text-center font-medium text-sm">
@@ -223,10 +216,14 @@ const VIPSystem: React.FC = () => {
                 </div>
               ) : (
                 <button
-                  onClick={() => handleUpgrade(vip.level, vip.cost)}
-                  className={`w-full py-3 px-4 bg-gradient-to-r ${vip.color} text-white rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm`}
+                  onClick={() => handleUpgrade(parseInt(vip.id), vip.cost)}
+                  disabled={subscribing || !user || user.balance < vip.cost}
+                  className={`w-full py-3 px-4 bg-gradient-to-r ${vip.color} text-white rounded-xl font-medium transition-all duration-200 transform hover:scale-105 shadow-lg text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
                 >
-                  Upgrade for ${vip.cost}
+                  {subscribing ? (
+                    <Loader2 className="h-4 w-4 animate-spin inline mr-2" />
+                  ) : null}
+                  {!user || user.balance < vip.cost ? 'Insufficient Balance' : `Upgrade for $${vip.cost}`}
                 </button>
               )}
               <button
@@ -241,6 +238,14 @@ const VIPSystem: React.FC = () => {
       </div>
     );
   };
+
+  if (subscriptionsLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary-600" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -332,7 +337,7 @@ const VIPSystem: React.FC = () => {
                 }`}
                 disabled={vip.status === 'closed'}
               >
-                {isCurrentLevel && vip.level === 0 ? 'Receive Tasks' : isCurrentLevel ? 'Current Level' : vip.status === 'closed' ? 'Not Available' : 'View Details'}
+                {isCurrentLevel && vip.level === 0 ? 'Current Level' : isCurrentLevel ? 'Current Level' : vip.status === 'closed' ? 'Not Available' : 'View Details'}
               </button>
             </div>
           );
